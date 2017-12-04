@@ -148,25 +148,22 @@ func assemble(fileName, outputFileName string) error {
 	}
 	insts = append(insts, strToInst("JR 0"))
 
-	codeSize, dataSize := make([]byte, 8), make([]byte, 8)
-	binary.BigEndian.PutUint64(codeSize, uint64(len(insts)*4))
-	binary.BigEndian.PutUint64(dataSize, uint64(len(datum)*8))
-	fp, err = os.Create(outputFileName)
-	if err != nil {
-		return err
+	elf := NewELFFile()
+	prog := make([]uint32, len(insts))
+	for i, v := range insts {
+		prog[i] = binary.BigEndian.Uint32(v.instTobytes())
 	}
-	defer fp.Close()
-	w := bufio.NewWriter(fp)
-	w.Write(codeSize)
-	w.Write(dataSize)
-	for _, i := range insts {
-		w.Write(i.instTobytes())
+
+	progHeader := ElfProgHeader{
+		ProgType:     ProgTypeLoad,
+		ProgFlags:    ProgFlagExecute + ProgFlagRead,
+		ProgVAddr:    ProgEntryAddr,
+		ProgPAddr:    0,
+		ProgFileSize: uint64(len(insts) * 4),
+		Prog:         prog,
 	}
-	for _, d := range datum {
-		b := make([]byte, 8)
-		binary.BigEndian.PutUint64(b, d)
-		w.Write(b)
-	}
-	w.Flush()
+
+	elf.AddSegment(&progHeader)
+	elf.WriteELFFile(outputFileName)
 	return nil
 }

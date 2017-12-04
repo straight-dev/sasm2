@@ -1,16 +1,17 @@
 package main
 
 import (
+	"bytes"
 	"encoding/binary"
-	"fmt"
 	"os"
-	"unsafe"
 )
 
 type ElfAddr uint64
 type ElfOff uint64
 type ElfSection uint16
 type ElfVersym uint16
+
+const ProgEntryAddr = 0x40000
 
 const (
 	ElfIdentCLASS      = 4  /* Class of machine. */
@@ -84,7 +85,7 @@ const (
 	ProgFlagRead    = 4
 )
 
-type ElfSegment []uint64
+type ElfSegment []uint32
 type ElfProgHeader struct {
 	ProgType     ProgType
 	ProgFlags    uint32
@@ -97,12 +98,16 @@ type ElfProgHeader struct {
 	Prog         ElfSegment
 }
 
+const ElfProgHeaderSize = (32*2 + 64*6) / 8 // bytes
+
 type ElfFile struct {
 	Header   ElfHeader
 	Programs []*ElfProgHeader
 }
 
-func newELFHeader() ElfHeader {
+const ElfHeaderSize = 64
+
+func NewELFHeader() ElfHeader {
 	var ei [16]byte
 	ei[0] = 0x7f
 	ei[1] = 'E'
@@ -117,87 +122,112 @@ func newELFHeader() ElfHeader {
 		ElfType:       ElfTypeExec,
 		ElfMachine:    ElfMachineSTRAIGHT,
 		ElfVersion:    ElfVersionCurrent,
-		ElfEntry:      0x40000,
-		ElfPHOff:      0,
+		ElfEntry:      ProgEntryAddr,
+		ElfPHOff:      ElfHeaderSize,
 		ElfSHOff:      0,
 		ElfFlags:      0,
-		ElfEHSize:     0,
+		ElfEHSize:     ElfHeaderSize,
 		ElfPHEntSize:  0,
 		ElfPHEntNum:   0,
 		ElfSHEntSize:  0,
 		ElfSHEntNum:   0,
 		ElfSHStrIndex: 0,
 	}
-	eh.ElfEHSize = uint16(unsafe.Sizeof(eh))
 	return eh
 }
 
-func newELFFile() *ElfFile {
+func NewELFFile() *ElfFile {
 	ef := ElfFile{
-		Header: newELFHeader(),
+		Header: NewELFHeader(),
 	}
 	return &ef
 }
 
-func (elf *ElfFile) writeELFFile(fileName string) error {
+func (elf *ElfFile) WriteELFFile(fileName string) error {
 	var bo binary.ByteOrder
 	if elf.Header.ElfIdent[ElfIdentDATA] == ElfIdentData2LSB {
 		bo = binary.LittleEndian
 	} else {
 		bo = binary.BigEndian
 	}
-
+	elf.Legalize()
 	fp, err := os.Create(fileName)
 	if err != nil {
 		return err
 	}
 	defer fp.Close()
 
-	err = elf.Header.writeELFHeader(fp, bo)
+	err = elf.Header.WriteELFHeader(fp, bo)
 	if err != nil {
 		return err
 	}
-	return nil
 
+	for _, p := range elf.Programs {
+		err = p.WriteELFProgHeader(fp, bo)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
-func (eh *ElfHeader) writeELFHeader(fp *os.File, bo binary.ByteOrder) error {
-	ehb := make([]byte, eh.ElfEHSize)
-	offset := 0
-	for ; offset < ElfIdentNIDENT; offset++ {
-		ehb[offset] = eh.ElfIdent[offset]
-	}
-	bo.PutUint16(ehb[offset:offset+2], uint16(eh.ElfType))
-	offset += 2
-	bo.PutUint16(ehb[offset:offset+2], uint16(eh.ElfMachine))
-	offset += 2
-	bo.PutUint32(ehb[offset:offset+4], uint32(eh.ElfVersion))
-	offset += 4
-	bo.PutUint64(ehb[offset:offset+8], uint64(eh.ElfEntry))
-	offset += 8
-	bo.PutUint64(ehb[offset:offset+8], uint64(eh.ElfPHOff))
-	offset += 8
-	bo.PutUint64(ehb[offset:offset+8], uint64(eh.ElfSHOff))
-	offset += 8
-	bo.PutUint32(ehb[offset:offset+4], eh.ElfFlags)
-	offset += 4
-	bo.PutUint16(ehb[offset:offset+2], eh.ElfEHSize)
-	offset += 2
-	bo.PutUint16(ehb[offset:offset+2], eh.ElfPHEntSize)
-	offset += 2
-	bo.PutUint16(ehb[offset:offset+2], eh.ElfPHEntNum)
-	offset += 2
-	bo.PutUint16(ehb[offset:offset+2], eh.ElfSHEntSize)
-	offset += 2
-	bo.PutUint16(ehb[offset:offset+2], eh.ElfSHEntNum)
-	offset += 2
-	bo.PutUint16(ehb[offset:offset+2], eh.ElfSHStrIndex)
-	offset += 2
+func (eh *ElfHeader) WriteELFHeader(fp *os.File, bo binary.ByteOrder) error {
+	var ehb bytes.Buffer
+	binary.Write(&ehb, bo, eh)
+	_, err := fp.Write(ehb.Bytes())
+	return err
+}
 
-	n, err := fp.Write(ehb)
-	if err != nil {
-		return err
-	}
-	fmt.Printf("write %d bytes (header)\n", n)
+func (elf *ElfFile) LegalizeHeader() error {
+	elf.Header.ElfPHEntNum = uint16(len(elf.Programs))
+	elf.Header.ElfPHEntSize = ElfProgHeaderSize
 	return nil
+}
+
+// PageSize : 4KB (onikiri)
+const PageSize = 4096
+
+func (elf *ElfFile) Legalize() error {
+	elf.LegalizeHeader()
+
+	var offset uint64 = ElfHeaderSize + ElfProgHeaderSize
+	for i := 0; i < len(elf.Programs); i++ {
+		elf.Programs[i].ProgOffset = ElfAddr(offset)
+		offset += elf.Programs[i].ProgFileSize
+		elf.Programs[i].ProgAlign = offset % PageSize
+		if elf.Programs[i].ProgFlags&ProgFlagExecute == ProgFlagExecute {
+			elf.Header.ElfEntry = ElfAddr(ProgEntryAddr + offset%PageSize)
+		}
+	}
+	return nil
+}
+
+func (elf *ElfFile) AddSegment(ph *ElfProgHeader) error {
+	elf.Programs = append(elf.Programs, ph)
+	elf.LegalizeHeader()
+	return nil
+}
+
+func (ph *ElfProgHeader) WriteELFProgHeader(fp *os.File, bo binary.ByteOrder) error {
+	phb := make([]byte, ElfProgHeaderSize)
+	offset := 0
+	bo.PutUint32(phb[offset:offset+4], uint32(ph.ProgType)) // TODO: use binary.Write
+	offset += 4
+	bo.PutUint32(phb[offset:offset+4], ph.ProgFlags)
+	offset += 4
+	bo.PutUint64(phb[offset:offset+8], uint64(ph.ProgOffset))
+	offset += 8
+	bo.PutUint64(phb[offset:offset+8], uint64(ph.ProgVAddr))
+	offset += 8
+	bo.PutUint64(phb[offset:offset+8], uint64(ph.ProgPAddr))
+	offset += 8
+	bo.PutUint64(phb[offset:offset+8], ph.ProgFileSize)
+	offset += 8
+	bo.PutUint64(phb[offset:offset+8], ph.ProgMemSize)
+	offset += 8
+	bo.PutUint64(phb[offset:offset+8], ph.ProgAlign)
+	offset += 8
+
+	_, err := fp.Write(phb)
+	return err
 }
