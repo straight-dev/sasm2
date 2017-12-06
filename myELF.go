@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/binary"
+	"errors"
 	"os"
 )
 
@@ -85,7 +86,7 @@ const (
 	ProgFlagRead    = 4
 )
 
-type ElfSegment []uint32
+type ElfSegment []byte
 type ElfProgHeader struct {
 	ProgType     ProgType
 	ProgFlags    uint32
@@ -168,6 +169,15 @@ func (elf *ElfFile) WriteELFFile(fileName string) error {
 			return err
 		}
 	}
+
+	for _, p := range elf.Programs {
+		n, e := fp.Write(p.Prog)
+		if e != nil {
+			return e
+		} else if n < len(p.Prog) {
+			return errors.New("failed to write segments")
+		}
+	}
 	return nil
 }
 
@@ -192,6 +202,7 @@ func (elf *ElfFile) Legalize() error {
 
 	var offset uint64 = ElfHeaderSize + ElfProgHeaderSize
 	for i := 0; i < len(elf.Programs); i++ {
+		elf.Programs[i].ProgFileSize = uint64(len(elf.Programs[i].Prog))
 		elf.Programs[i].ProgOffset = ElfAddr(offset)
 		offset += elf.Programs[i].ProgFileSize
 		elf.Programs[i].ProgAlign = offset % PageSize

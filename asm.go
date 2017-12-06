@@ -149,9 +149,10 @@ func assemble(fileName, outputFileName string) error {
 	insts = append(insts, strToInst("JR 0"))
 
 	elf := NewELFFile()
-	prog := make([]uint32, len(insts))
+	prog := make([]byte, len(insts)*4)
 	for i, v := range insts {
-		prog[i] = binary.BigEndian.Uint32(v.instTobytes())
+		t := v.instTobytes()
+		copy(prog[4*i:4*i+3], t)
 	}
 
 	progHeader := ElfProgHeader{
