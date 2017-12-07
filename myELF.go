@@ -7,11 +7,19 @@ import (
 	"os"
 )
 
+// ElfAddr : 64bit address
 type ElfAddr uint64
+
+// ElfOff : Offset = 64bit address
 type ElfOff uint64
+
+// ElfSection : Section index (16 bit)
 type ElfSection uint16
+
+// ElfVersym : Version Number of ELF
 type ElfVersym uint16
 
+// ProgEntryAddr : Entry address of this program
 const ProgEntryAddr = 0x40000
 
 const (
@@ -46,7 +54,7 @@ const (
 
 type ElfMachine uint16
 
-// EM_STRAIGHT is the machine code of STRAIGHT; found in elf.Header.Machine
+// ElfMachineSTRAIGHT is the machine code of STRAIGHT; found in elf.Header.Machine
 const ElfMachineSTRAIGHT ElfMachine = 256
 
 type ElfVersion uint32
