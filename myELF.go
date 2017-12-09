@@ -214,6 +214,8 @@ func (elf *ElfFile) Legalize() error {
 		elf.Programs[i].ProgOffset = ElfAddr(offset)
 		offset += elf.Programs[i].ProgFileSize
 		elf.Programs[i].ProgAlign = offset % PageSize
+		elf.Programs[i].ProgMemSize = elf.Programs[i].ProgFileSize
+
 		if elf.Programs[i].ProgFlags&ProgFlagExecute == ProgFlagExecute {
 			elf.Header.ElfEntry = ElfAddr(ProgEntryAddr + offset%PageSize)
 		}
