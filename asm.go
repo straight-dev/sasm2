@@ -163,13 +163,21 @@ func assemble(fileName, outputFileName string) error {
 		ProgFileSize: uint64(len(insts) * 4),
 		Prog:         prog,
 	}
+	elf.AddSegment(&progHeader)
 
 	secHeader := ElfSecHeader{
 		SecType: SecTypeNull,
 	}
-
-	elf.AddSegment(&progHeader)
 	elf.Sections = append(elf.Sections, &secHeader)
+
+	secStrTable := ElfSecHeader{
+		SecType: SecTypeStrTab,
+		Sec:     make([]byte, 20),
+	}
+	secStrTable.Sec[0] = 0x0
+	copy(secStrTable.Sec[1:], "DummySectionHeader")
+	elf.Sections = append(elf.Sections, &secStrTable)
+
 	elf.WriteELFFile(outputFileName)
 	return nil
 }

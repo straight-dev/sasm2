@@ -142,6 +142,7 @@ type ElfSecHeader struct {
 	SecInfo      uint32
 	SecAddrAlign uint64
 	SecEntSize   uint64
+	Sec          ElfSection
 }
 
 const ElfSecHeaderSize = (32*4 + 64*6) / 8 // bytes
@@ -225,7 +226,16 @@ func (elf *ElfFile) WriteELFFile(fileName string) error {
 		}
 	}
 
-	err = elf.Sections[0].WriteELFSecHeader(fp, bo)
+	_, err = fp.Write(elf.Sections[1].Sec)
+	if err != nil {
+		return err
+	}
+	for _, s := range elf.Sections {
+		err = s.WriteELFSecHeader(fp, bo)
+		if err != nil {
+			return err
+		}
+	}
 	return err
 }
 
@@ -264,11 +274,17 @@ func (elf *ElfFile) Legalize() error {
 		}
 	}
 
+	// StrTable
+	offset += uint64(len(elf.Sections[1].Sec))
+	elf.Header.ElfSHOff = ElfOff(offset)
 	// Legalize Section Header
 	elf.Sections[0].SecSize = 0
 	elf.Sections[0].SecType = SecTypeNull
 	elf.Sections[0].SecOffset = ElfOff(offset)
 
+	// Legalize SecHeader of StrTable
+	elf.Sections[1].SecSize = uint64(len(elf.Sections[1].Sec))
+	elf.Sections[1].SecOffset = ElfOff(offset)
 	return nil
 }
 
