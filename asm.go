@@ -164,7 +164,12 @@ func assemble(fileName, outputFileName string) error {
 		Prog:         prog,
 	}
 
+	secHeader := ElfSecHeader{
+		SecType: SecTypeNull,
+	}
+
 	elf.AddSegment(&progHeader)
+	elf.Sections = append(elf.Sections, &secHeader)
 	elf.WriteELFFile(outputFileName)
 	return nil
 }

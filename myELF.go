@@ -13,9 +13,6 @@ type ElfAddr uint64
 // ElfOff : Offset = 64bit address
 type ElfOff uint64
 
-// ElfSection : Section index (16 bit)
-type ElfSection uint16
-
 // ElfVersym : Version Number of ELF
 type ElfVersym uint16
 
@@ -109,9 +106,50 @@ type ElfProgHeader struct {
 
 const ElfProgHeaderSize = (32*2 + 64*6) / 8 // bytes
 
+type SecType uint32
+
+const (
+	SecTypeNull SecType = iota
+	SecTypeProgBits
+	SecTypeSymTab
+	SecTypeStrTab
+	SecTypeRela
+	SecTypeHash
+	SecTypeSHLib
+	SecTypeDynSym
+	SecTypeLoProc SecType = 0x70000000
+	SecTypeHiProc SecType = 0x7fffffff
+	SecTypeLoUser SecType = 0x80000000
+	SecTypeHiUser SecType = 0xf8ffffff
+)
+
+const (
+	SHFlagWrite     = 0x1
+	SHFlagAlloc     = 0x2
+	SHFlagExecInstr = 0x4
+	SHFlagMaskProc  = 0xF0000000
+)
+
+type ElfSection []byte
+type ElfSecHeader struct {
+	SecName      uint32
+	SecType      SecType
+	SecFlags     uint64
+	SecAddr      ElfAddr
+	SecOffset    ElfOff
+	SecSize      uint64
+	SecLink      uint32
+	SecInfo      uint32
+	SecAddrAlign uint64
+	SecEntSize   uint64
+}
+
+const ElfSecHeaderSize = (32*4 + 64*6) / 8 // bytes
+
 type ElfFile struct {
 	Header   ElfHeader
 	Programs []*ElfProgHeader
+	Sections []*ElfSecHeader
 }
 
 const ElfHeaderSize = 64
@@ -186,7 +224,9 @@ func (elf *ElfFile) WriteELFFile(fileName string) error {
 			return errors.New("failed to write segments")
 		}
 	}
-	return nil
+
+	err = elf.Sections[0].WriteELFSecHeader(fp, bo)
+	return err
 }
 
 func (eh *ElfHeader) WriteELFHeader(fp *os.File, bo binary.ByteOrder) error {
@@ -199,6 +239,8 @@ func (eh *ElfHeader) WriteELFHeader(fp *os.File, bo binary.ByteOrder) error {
 func (elf *ElfFile) LegalizeHeader() error {
 	elf.Header.ElfPHEntNum = uint16(len(elf.Programs))
 	elf.Header.ElfPHEntSize = ElfProgHeaderSize
+	elf.Header.ElfSHEntNum = uint16(len(elf.Sections))
+	elf.Header.ElfSHEntSize = ElfSecHeaderSize
 	return nil
 }
 
@@ -208,6 +250,7 @@ const PageSize = 4096
 func (elf *ElfFile) Legalize() error {
 	elf.LegalizeHeader()
 
+	// Legalize Segment Header
 	var offset uint64 = ElfHeaderSize + ElfProgHeaderSize
 	for i := 0; i < len(elf.Programs); i++ {
 		elf.Programs[i].ProgFileSize = uint64(len(elf.Programs[i].Prog))
@@ -218,6 +261,12 @@ func (elf *ElfFile) Legalize() error {
 			elf.Header.ElfEntry = ElfAddr(ProgEntryAddr + offset%PageSize)
 		}
 	}
+
+	// Legalize Section Header
+	elf.Sections[0].SecSize = 0
+	elf.Sections[0].SecType = SecTypeNull
+	elf.Sections[0].SecOffset = ElfOff(offset)
+
 	return nil
 }
 
@@ -248,5 +297,33 @@ func (ph *ElfProgHeader) WriteELFProgHeader(fp *os.File, bo binary.ByteOrder) er
 	offset += 8
 
 	_, err := fp.Write(phb)
+	return err
+}
+
+func (sh *ElfSecHeader) WriteELFSecHeader(fp *os.File, bo binary.ByteOrder) error {
+	shb := make([]byte, ElfSecHeaderSize)
+	offset := 0
+	bo.PutUint32(shb[offset:offset+4], sh.SecName)
+	offset += 4
+	bo.PutUint32(shb[offset:offset+4], uint32(sh.SecType))
+	offset += 4
+	bo.PutUint64(shb[offset:offset+8], sh.SecFlags)
+	offset += 8
+	bo.PutUint64(shb[offset:offset+8], uint64(sh.SecAddr))
+	offset += 8
+	bo.PutUint64(shb[offset:offset+8], uint64(sh.SecOffset))
+	offset += 8
+	bo.PutUint64(shb[offset:offset+8], sh.SecSize)
+	offset += 8
+	bo.PutUint32(shb[offset:offset+4], sh.SecLink)
+	offset += 4
+	bo.PutUint32(shb[offset:offset+4], sh.SecInfo)
+	offset += 4
+	bo.PutUint64(shb[offset:offset+8], sh.SecAddrAlign)
+	offset += 8
+	bo.PutUint64(shb[offset:offset+8], sh.SecEntSize)
+	offset += 8
+
+	_, err := fp.Write(shb)
 	return err
 }
