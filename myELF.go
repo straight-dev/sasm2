@@ -226,6 +226,7 @@ func (elf *ElfFile) WriteELFFile(fileName string) error {
 		}
 	}
 
+	// write strtable
 	_, err = fp.Write(elf.Sections[1].Sec)
 	if err != nil {
 		return err
@@ -275,6 +276,10 @@ func (elf *ElfFile) Legalize() error {
 	}
 
 	// StrTable
+	strTableOffset := offset
+	elf.Header.ElfSHStrIndex = 1
+	elf.Sections[0].SecName = 1
+	elf.Sections[1].SecName = 1
 	offset += uint64(len(elf.Sections[1].Sec))
 	elf.Header.ElfSHOff = ElfOff(offset)
 	// Legalize Section Header
@@ -284,7 +289,7 @@ func (elf *ElfFile) Legalize() error {
 
 	// Legalize SecHeader of StrTable
 	elf.Sections[1].SecSize = uint64(len(elf.Sections[1].Sec))
-	elf.Sections[1].SecOffset = ElfOff(offset)
+	elf.Sections[1].SecOffset = ElfOff(strTableOffset)
 	return nil
 }
 
