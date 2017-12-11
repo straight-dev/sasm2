@@ -266,12 +266,16 @@ func (elf *ElfFile) Legalize() error {
 	for i := 0; i < len(elf.Programs); i++ {
 		elf.Programs[i].ProgFileSize = uint64(len(elf.Programs[i].Prog))
 		elf.Programs[i].ProgOffset = ElfAddr(offset)
-		offset += elf.Programs[i].ProgFileSize
 		elf.Programs[i].ProgAlign = offset % PageSize
+		offset += elf.Programs[i].ProgFileSize
 		elf.Programs[i].ProgMemSize = elf.Programs[i].ProgFileSize
 
 		if elf.Programs[i].ProgFlags&ProgFlagExecute == ProgFlagExecute {
 			elf.Header.ElfEntry = ElfAddr(ProgEntryAddr + offset%PageSize)
+			elf.Programs[i].ProgOffset = 0
+			elf.Programs[i].ProgAlign = 0
+			elf.Programs[i].ProgFileSize += ElfHeaderSize + ElfProgHeaderSize
+			elf.Programs[i].ProgMemSize = elf.Programs[i].ProgFileSize
 		}
 	}
 
