@@ -16,8 +16,8 @@ type ElfOff uint64
 // ElfVersym : Version Number of ELF
 type ElfVersym uint16
 
-// ProgEntryAddr : Entry address of this program
-const ProgEntryAddr = 0x40000
+// ProgEntryAddr : Entry address of this program (precise entry address is ProgEntryAddr + the ELF Header and Segment Headers' offset)
+const ProgEntryAddr = 0x120000000
 
 const (
 	ElfIdentCLASS      = 4  /* Class of machine. */
