@@ -11,8 +11,8 @@ cases = ""
 for i, l in enumerate(lines):
   if l.startswith("#"):
     continue
-  
-  opcode, name, regtype, immsext, _ = l.split(",", 4)
+  l = l.strip()
+  opcode, name, regtype, immsext = l.split(",")
   if i == 1:
     opcodes += "\tOp{0} OpCode = iota\n".format(name)
   else:

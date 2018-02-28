@@ -24,14 +24,12 @@ type OpCode int
 // OpCode
 const (
 	OpNOP OpCode = iota
-	OpHALT
 	OpSYSCALL
-	OpRETRISCV
-	OpGETRISCVREG
-	OpSETRISCVREG
+	OpSYSRET
 	OpJ
 	OpJR
 	OpJAL
+	OpJRAL
 	OpBEZ
 	OpBNZ
 	OpADD
@@ -42,8 +40,12 @@ const (
 	OpMULi
 	OpDIV
 	OpDIVi
+	OpDIVU
+	OpDIVUi
 	OpMOD
 	OpMODi
+	OpMODU
+	OpMODUi
 	OpSLT
 	OpSLTi
 	OpSLTU
@@ -68,24 +70,21 @@ const (
 	OpXOR
 	OpXORi
 	OpLUi
-	OpAUIPC
 	OpSPADDi
-	OpFPADDi
-	OpGPADDi
 	OpRPINC
 	OpRMOV
 	OpLD
 	OpLDH
 	OpLDHU
-	OpLDQ
-	OpLDQU
 	OpLDB
 	OpLDBU
 	OpST
 	OpSTH
-	OpSTQ
 	OpSTB
-	OpSEXT
+	OpSEXT16TO32
+	OpSEXT8TO32
+	OpZEXT16TO32
+	OpZEXT8TO32
 
 	Op_MAX // NOT OP
 )
@@ -95,22 +94,18 @@ func GetInstType(oc OpCode) (InstType, bool, error) {
 	switch oc {
 	case OpNOP:
 		return ZeroReg, false, nil
-	case OpHALT:
-		return ZeroReg, false, nil
 	case OpSYSCALL:
 		return ZeroReg, false, nil
-	case OpRETRISCV:
+	case OpSYSRET:
 		return ZeroReg, false, nil
-	case OpGETRISCVREG:
-		return ZeroReg, false, nil
-	case OpSETRISCVREG:
-		return OneReg, false, nil
 	case OpJ:
-		return ZeroReg, false, nil
+		return ZeroReg, true, nil
 	case OpJR:
-		return OneReg, true, nil
+		return OneReg, false, nil
 	case OpJAL:
 		return ZeroReg, true, nil
+	case OpJRAL:
+		return OneReg, false, nil
 	case OpBEZ:
 		return OneReg, true, nil
 	case OpBNZ:
@@ -131,10 +126,18 @@ func GetInstType(oc OpCode) (InstType, bool, error) {
 		return TwoReg, false, nil
 	case OpDIVi:
 		return OneReg, true, nil
+	case OpDIVU:
+		return TwoReg, false, nil
+	case OpDIVUi:
+		return OneReg, false, nil
 	case OpMOD:
 		return TwoReg, false, nil
 	case OpMODi:
 		return OneReg, true, nil
+	case OpMODU:
+		return TwoReg, false, nil
+	case OpMODUi:
+		return OneReg, false, nil
 	case OpSLT:
 		return TwoReg, false, nil
 	case OpSLTi:
@@ -142,7 +145,7 @@ func GetInstType(oc OpCode) (InstType, bool, error) {
 	case OpSLTU:
 		return TwoReg, false, nil
 	case OpSLTUi:
-		return OneReg, true, nil
+		return OneReg, false, nil
 	case OpFTOI:
 		return OneReg, false, nil
 	case OpITOF:
@@ -183,13 +186,7 @@ func GetInstType(oc OpCode) (InstType, bool, error) {
 		return OneReg, false, nil
 	case OpLUi:
 		return ZeroReg, false, nil
-	case OpAUIPC:
-		return ZeroReg, false, nil
 	case OpSPADDi:
-		return OneReg, true, nil
-	case OpFPADDi:
-		return OneReg, true, nil
-	case OpGPADDi:
 		return OneReg, true, nil
 	case OpRPINC:
 		return ZeroReg, false, nil
@@ -201,10 +198,6 @@ func GetInstType(oc OpCode) (InstType, bool, error) {
 		return OneReg, true, nil
 	case OpLDHU:
 		return OneReg, true, nil
-	case OpLDQ:
-		return OneReg, true, nil
-	case OpLDQU:
-		return OneReg, true, nil
 	case OpLDB:
 		return OneReg, true, nil
 	case OpLDBU:
@@ -213,11 +206,15 @@ func GetInstType(oc OpCode) (InstType, bool, error) {
 		return TwoReg, true, nil
 	case OpSTH:
 		return TwoReg, true, nil
-	case OpSTQ:
-		return TwoReg, true, nil
 	case OpSTB:
 		return TwoReg, true, nil
-	case OpSEXT:
+	case OpSEXT16TO32:
+		return OneReg, false, nil
+	case OpSEXT8TO32:
+		return OneReg, false, nil
+	case OpZEXT16TO32:
+		return OneReg, false, nil
+	case OpZEXT8TO32:
 		return OneReg, false, nil
 
 	default:

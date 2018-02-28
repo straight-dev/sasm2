@@ -1,65 +1,63 @@
-#OPCODE,Name,Format,Imm Sign Extend,
-0,NOP,Z,N,; 即値下位10bitの分だけ更にRPを進める
-1,HALT,Z,x,
-2,SYSCALL,Z,N,; システムコール
-3,RETRISCV,Z,N,; RISC-Vモードに戻る（SYSCALLに入れられそうな気も）; CALLにも使うなら名前を変えるべき？
-4,GETRISCVREG,Z,N,; 即値で指定したRISC-Vのレジスタの値をコピーする
-5,SETRISCVREG,O,N,; 即値で指定したRISC-Vのレジスタに値をコピーする
-6,J,Z,N,; 直接アドレスを指定してのジャンプ
-7,JR,O,Y,; レジスタ間接ジャンプ　リターンにもつかう
-8,JAL,Z,Y,; コール　PC+4をdestへ．欲しければJRALも作る
-9,BEZ,O,Y,; レジスタ値が0であればPC相対ジャンプ
-10,BNZ,O,Y,; レジスタ値が非零であればPC相対ジャンプ
-11,ADD,T,x,
-12,ADDi,O,Y,
-13,SUB,T,x,
-14,SUBi,O,Y,
-15,MUL,T,x,
-16,MULi,O,Y,
-17,DIV,T,x,
-18,DIVi,O,Y,
-19,MOD,T,x,
-20,MODi,O,Y,
-21,SLT,T,x,; Set Less Than;  第一項＜第二項なら-1(11…11) それ以外は0
-22,SLTi,O,Y,
-23,SLTU,T,x,; 符号なし比較
-24,SLTUi,O,Y,
-25,FTOI,O,x,
-26,ITOF,O,x,
-27,FADD,T,x,
-28,FSUB,T,x,
-29,FMUL,T,x,
-30,FDIV,T,x,
-31,FSLT,T,N,"; 浮動小数点数用Set Less Than, NANなどのトラップ？"
-32,SHL,T,x,; 第1項を第二項分左シフト
-33,SHLi,O,N,
-34,SHR,T,x,
-35,SHRi,O,N,
-36,SHRA,T,x,; 算術右シフト
-37,SHRAi,O,N,
-38,AND,T,x,
-39,ANDi,O,N,
-40,OR,T,x,
-41,ORi,O,N,
-42,XOR,T,x,
-43,XORi,O,N,
-44,LUi,Z,N,; 26bit即値をデスティネーションの42-17ビットに入れる
-45,AUIPC,Z,N,; 26bit即値を16ビット左シフトしたものをPCに足す
-46,SPADDi,O,Y,; dstRegにはADD後のSPの値を吐き出す
-47,FPADDi,O,Y,"; FP, GPは本当に必要？"
-48,GPADDi,O,Y,
-49,RPINC,Z,N,"; RPINC 0 = NOP, RPINC xでRP += x + 1"
-50,RMOV,O,x,; dstReg <- srcReg
-51,LD,O,Y,; LD
-52,LDH,O,Y,; Load Half Word = 32bit
-53,LDHU,O,Y,; 符号拡張なしのロード
-54,LDQ,O,Y,; Load Quarter Word = 16 bit
-55,LDQU,O,Y,
-56,LDB,O,Y,; Load Byte
-57,LDBU,O,Y,
-58,ST,T,Y,; 第一項が書き込み値、第二項がベースアドレス、即値がオフセット
-59,STH,T,Y,
-60,STQ,T,Y,
-61,STB,T,Y,
-62,SEXT,O,N,"; 符号拡張命令: 即値最上位1ビットが1なら符号あり、0なら符号なしで、即値の下位ビットの示すビット数から64ビットへと拡張する．8, 16, 32ビット → 64ビットのみ認め、それ以外は未定義"
-#63,*RESERVED*,,,; 最下位6ビットをfunctとして、追加される命令をここに入れていく
+#OPCODE,Name,Format,Imm Sign Extend
+0,NOP,Z,x
+1,SYSCALL,Z,N
+2,SYSRET,Z,N
+3,J,Z,Y
+4,JR,O,x
+5,JAL,Z,Y
+6,JRAL,O,x
+7,BEZ,O,Y
+8,BNZ,O,Y
+9,ADD,T,x
+10,ADDi,O,Y
+11,SUB,T,x
+12,SUBi,O,Y
+13,MUL,T,x
+14,MULi,O,Y
+15,DIV,T,x
+16,DIVi,O,Y
+17,DIVU,T,x
+18,DIVUi,O,N
+19,MOD,T,x
+20,MODi,O,Y
+21,MODU,T,x
+22,MODUi,O,N
+23,SLT,T,x
+24,SLTi,O,Y
+25,SLTU,T,x
+26,SLTUi,O,N
+27,FTOI,O,x
+28,ITOF,O,x
+29,FADD,T,x
+30,FSUB,T,x
+31,FMUL,T,x
+32,FDIV,T,x
+33,FSLT,T,x
+34,SHL,T,x
+35,SHLi,O,N
+36,SHR,T,x
+37,SHRi,O,N
+38,SHRA,T,x
+39,SHRAi,O,N
+40,AND,T,x
+41,ANDi,O,N
+42,OR,T,x
+43,ORi,O,N
+44,XOR,T,x
+45,XORi,O,N
+46,LUi,Z,N
+47,SPADDi,O,Y
+48,RPINC,Z,N
+49,RMOV,O,x
+50,LD,O,Y
+51,LDH,O,Y
+52,LDHU,O,Y
+53,LDB,O,Y
+54,LDBU,O,Y
+55,ST,T,Y
+56,STH,T,Y
+57,STB,T,Y
+58,SEXT16TO32,O,N
+59,SEXT8TO32,O,N
+60,ZEXT16TO32,O,N
+61,ZEXT8TO32,O,N
