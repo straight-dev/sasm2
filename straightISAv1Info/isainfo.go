@@ -99,7 +99,7 @@ func GetInstType(oc OpCode) (InstType, bool, error) {
 	case OpJR:
 		return OneReg, true, nil
 	case OpJAL:
-		return ZeroReg, false, nil
+		return ZeroReg, true, nil
 	case OpBEZ:
 		return OneReg, true, nil
 	case OpBNZ:
