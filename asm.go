@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	. "github.com/clkbug/sasm2/straightISAv1Info"
+	. "github.com/clkbug/sasm2/straightISAv2Info"
 )
 
 const dataStartAddr = 0x100

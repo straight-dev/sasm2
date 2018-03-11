@@ -1,0 +1,37 @@
+package straightISAv1Info
+
+import (
+	"errors"
+	"strconv"
+)
+
+//go:generate stringer -type=InstType isainfo.go
+//go:generate stringer -type=OpCode isainfo.go
+
+// InstType : ZeroReg/OneReg/TwoReg
+type InstType int
+
+// InstType
+const (
+	ZeroReg InstType = iota
+	OneReg
+	TwoReg
+)
+
+// OpCode : オペコード
+type OpCode int
+
+// OpCode
+const (
+{0}
+	Op_MAX // NOT OP
+)
+
+func GetInstType(oc OpCode) (InstType, bool, error) {{
+	// the second return value: immediate value to be sign-extended
+	switch oc {{
+{1}
+	default:
+		return ZeroReg, false, errors.New(strconv.Itoa(int(oc)) + " is invalid opcode")
+	}}
+}}
