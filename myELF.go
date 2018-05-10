@@ -271,7 +271,7 @@ func (elf *ElfFile) Legalize() error {
 		elf.Programs[i].ProgMemSize = elf.Programs[i].ProgFileSize
 
 		if elf.Programs[i].ProgFlags&ProgFlagExecute == ProgFlagExecute {
-			elf.Header.ElfEntry = ElfAddr(ProgEntryAddr + offset%PageSize)
+			elf.Header.ElfEntry = ElfAddr(ProgEntryAddr + (offset-elf.Programs[i].ProgFileSize)%PageSize)
 			elf.Programs[i].ProgOffset = 0
 			elf.Programs[i].ProgAlign = 0
 			elf.Programs[i].ProgFileSize += ElfHeaderSize + ElfProgHeaderSize
