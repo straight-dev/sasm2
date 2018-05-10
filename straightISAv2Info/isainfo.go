@@ -1,4 +1,4 @@
-package straightISAv1Info
+package straightISAv2Info
 
 import (
 	"errors"
@@ -89,7 +89,6 @@ const (
 	Op_MAX // NOT OP
 )
 
-// GetInstType : OpCode -> RegType, IsSignExt
 func GetInstType(oc OpCode) (InstType, bool, error) {
 	// the second return value: immediate value to be sign-extended
 	switch oc {

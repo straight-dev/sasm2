@@ -1,4 +1,4 @@
-package straightISAv1Info
+package straightISAv2Info
 
 import (
 	"errors"
