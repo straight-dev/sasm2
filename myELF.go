@@ -227,7 +227,7 @@ func (elf *ElfFile) WriteELFFile(fileName string) error {
 	}
 
 	// write strtable
-	_, err = fp.Write(elf.Sections[1].Sec)
+	n, err := fp.Write(elf.Sections[1].Sec)
 	if err != nil {
 		return err
 	}

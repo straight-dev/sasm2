@@ -178,6 +178,5 @@ func assemble(fileName, outputFileName string) error {
 	copy(secStrTable.Sec[1:], "DummySectionHeader")
 	elf.Sections = append(elf.Sections, &secStrTable)
 
-	elf.WriteELFFile(outputFileName)
-	return nil
+	return elf.WriteELFFile(outputFileName)
 }
