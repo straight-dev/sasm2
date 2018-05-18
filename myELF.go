@@ -162,7 +162,7 @@ func NewELFHeader() ElfHeader {
 	ei[2] = 'L'
 	ei[3] = 'F'
 	ei[ElfIdentCLASS] = ElfIdentClass64
-	ei[ElfIdentDATA] = ElfIdentData2MSB
+	ei[ElfIdentDATA] = ElfIdentData2LSB
 	ei[ElfIdentVERSION] = byte(ElfVersionCurrent)
 
 	eh := ElfHeader{

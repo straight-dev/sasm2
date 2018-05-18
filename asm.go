@@ -36,7 +36,7 @@ func (inst *instruction) instTobytes() []byte {
 		i += (uint32(inst.regs[1]) & 0x3ff) << 6
 		i += imm & 0x3f
 	}
-	binary.BigEndian.PutUint32(b, i)
+	binary.LittleEndian.PutUint32(b, i)
 	return b
 }
 
@@ -152,7 +152,7 @@ func assemble(fileName, outputFileName string) error {
 	prog := make([]byte, len(insts)*4)
 	for i, v := range insts {
 		t := v.instTobytes()
-		copy(prog[4*i:4*i+3], t)
+		copy(prog[4*i:4*(i+1)], t)
 	}
 
 	progHeader := ElfProgHeader{
