@@ -10,5 +10,8 @@ func main() {
 
 	flag.Parse()
 
-	assemble(*fileName, *outputFileName)
+	err := assemble(*fileName, *outputFileName)
+	if err != nil {
+		println(err.Error())
+	}
 }

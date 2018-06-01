@@ -36,7 +36,7 @@ func (inst *instruction) instTobytes() []byte {
 		i += (uint32(inst.regs[1]) & 0x3ff) << 6
 		i += imm & 0x3f
 	}
-	binary.BigEndian.PutUint32(b, i)
+	binary.LittleEndian.PutUint32(b, i)
 	return b
 }
 
@@ -143,30 +143,40 @@ func assemble(fileName, outputFileName string) error {
 			insts = append(insts, strToInst(t))
 		}
 	}
-	if len(insts)%2 == 0 {
+	insts = append(insts, strToInst("JR 0"))
+	if len(insts)%2 == 1 {
 		insts = append(insts, strToInst("NOP"))
 	}
-	insts = append(insts, strToInst("JR 0"))
 
-	codeSize, dataSize := make([]byte, 8), make([]byte, 8)
-	binary.BigEndian.PutUint64(codeSize, uint64(len(insts)*4))
-	binary.BigEndian.PutUint64(dataSize, uint64(len(datum)*8))
-	fp, err = os.Create(outputFileName)
-	if err != nil {
-		return err
+	elf := NewELFFile()
+	prog := make([]byte, len(insts)*4)
+	for i, v := range insts {
+		t := v.instTobytes()
+		copy(prog[4*i:4*(i+1)], t)
 	}
-	defer fp.Close()
-	w := bufio.NewWriter(fp)
-	w.Write(codeSize)
-	w.Write(dataSize)
-	for _, i := range insts {
-		w.Write(i.instTobytes())
+
+	progHeader := ElfProgHeader{
+		ProgType:     ProgTypeLoad,
+		ProgFlags:    ProgFlagExecute + ProgFlagRead,
+		ProgVAddr:    ProgEntryAddr,
+		ProgPAddr:    0,
+		ProgFileSize: uint64(len(insts) * 4),
+		Prog:         prog,
 	}
-	for _, d := range datum {
-		b := make([]byte, 8)
-		binary.BigEndian.PutUint64(b, d)
-		w.Write(b)
+	elf.AddSegment(&progHeader)
+
+	secHeader := ElfSecHeader{
+		SecType: SecTypeNull,
 	}
-	w.Flush()
-	return nil
+	elf.Sections = append(elf.Sections, &secHeader)
+
+	secStrTable := ElfSecHeader{
+		SecType: SecTypeStrTab,
+		Sec:     make([]byte, 20),
+	}
+	secStrTable.Sec[0] = 0x0
+	copy(secStrTable.Sec[1:], "DummySectionHeader")
+	elf.Sections = append(elf.Sections, &secStrTable)
+
+	return elf.WriteELFFile(outputFileName)
 }

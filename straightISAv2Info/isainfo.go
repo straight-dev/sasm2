@@ -1,4 +1,4 @@
-package straightISAv1Info
+package straightISAv2Info
 
 import (
 	"errors"
@@ -187,7 +187,7 @@ func GetInstType(oc OpCode) (InstType, bool, error) {
 	case OpLUi:
 		return ZeroReg, false, nil
 	case OpSPADDi:
-		return OneReg, true, nil
+		return ZeroReg, true, nil
 	case OpRPINC:
 		return ZeroReg, false, nil
 	case OpRMOV:
