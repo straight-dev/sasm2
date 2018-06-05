@@ -12,6 +12,7 @@ import (
 )
 
 const dataStartAddr = 0x100
+const initialSP = 0x01000000
 
 type instruction struct {
 	opCode   OpCode
@@ -164,6 +165,17 @@ func assemble(fileName, outputFileName string) error {
 		Prog:         prog,
 	}
 	elf.AddSegment(&progHeader)
+
+	stackHeader := ElfProgHeader{
+		ProgType:     ProgTypeLoad,
+		ProgFlags:    ProgFlagWrite + ProgFlagRead,
+		ProgVAddr:    initialSP,
+		ProgPAddr:    0,
+		ProgFileSize: 0,
+		ProgMemSize:  0x10000,
+		Prog:         nil,
+	}
+	elf.AddSegment(&stackHeader)
 
 	secHeader := ElfSecHeader{
 		SecType: SecTypeNull,

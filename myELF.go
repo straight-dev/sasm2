@@ -268,8 +268,11 @@ func (elf *ElfFile) Legalize() error {
 		elf.Programs[i].ProgOffset = ElfAddr(offset)
 		elf.Programs[i].ProgAlign = offset % PageSize
 		offset += elf.Programs[i].ProgFileSize
-		elf.Programs[i].ProgMemSize = elf.Programs[i].ProgFileSize
-
+		if elf.Programs[i].ProgFileSize == 0 { // ad-hocにStack用のセグメントを処理する
+			offset += ElfProgHeaderSize // ヘッダも読み込まれないのでその分の調整がいる
+		} else {
+			elf.Programs[i].ProgMemSize = elf.Programs[i].ProgFileSize // ProgFileSizeが0ならMemSizeはそのままにしておく
+		}
 		if elf.Programs[i].ProgFlags&ProgFlagExecute == ProgFlagExecute {
 			elf.Header.ElfEntry = ElfAddr(ProgEntryAddr + (offset-elf.Programs[i].ProgFileSize)%PageSize)
 			elf.Programs[i].ProgOffset = 0
