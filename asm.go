@@ -172,7 +172,7 @@ func assemble(fileName, outputFileName string) error {
 		ProgVAddr:    initialSP,
 		ProgPAddr:    0,
 		ProgFileSize: 0,
-		ProgMemSize:  0x10000,
+		ProgMemSize:  0x100000,
 		Prog:         nil,
 	}
 	elf.AddSegment(&stackHeader)
