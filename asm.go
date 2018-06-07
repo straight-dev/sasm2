@@ -13,6 +13,7 @@ import (
 
 const dataStartAddr = 0x100
 const initialSP = 0x01000000
+const stackSize = 0x00500000
 
 type instruction struct {
 	opCode   OpCode
@@ -172,7 +173,7 @@ func assemble(fileName, outputFileName string) error {
 		ProgVAddr:    initialSP,
 		ProgPAddr:    0,
 		ProgFileSize: 0,
-		ProgMemSize:  0x100000,
+		ProgMemSize:  initialSP - stackSize,
 		Prog:         nil,
 	}
 	elf.AddSegment(&stackHeader)
