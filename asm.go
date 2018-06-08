@@ -162,7 +162,7 @@ func assemble(fileName, outputFileName string) error {
 		ProgFlags:    ProgFlagExecute + ProgFlagRead,
 		ProgVAddr:    ProgEntryAddr,
 		ProgPAddr:    0,
-		ProgFileSize: uint64(len(insts) * 4),
+		ProgFileSize: uint64(len(insts) * 4), // あとでlegalize
 		Prog:         prog,
 	}
 	elf.AddSegment(&progHeader)
