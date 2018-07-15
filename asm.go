@@ -158,10 +158,6 @@ func assemble(fileName, outputFileName string) error {
 			}
 		}
 	}
-	insts = append(insts, strToInst("JR 0"))
-	if len(insts)%2 == 1 {
-		insts = append(insts, strToInst("NOP"))
-	}
 
 	elf := NewELFFile()
 	prog := make([]byte, len(insts)*4)
