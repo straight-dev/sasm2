@@ -197,7 +197,6 @@ func assemble(fileName, outputFileName string) error {
 		ProgVAddr:    dataStartAddr,
 		ProgPAddr:    0,
 		ProgFileSize: uint64(len(datumbytes)),
-		ProgMemSize:  uint64(len(datumbytes)),
 		Prog:         datumbytes,
 	}
 	elf.AddSegment(&globalDataHeader)

@@ -262,25 +262,27 @@ func (elf *ElfFile) Legalize() error {
 	elf.LegalizeHeader()
 
 	// Legalize Segment Header
-	var offset uint64 = ElfHeaderSize + ElfProgHeaderSize
-	for i := 0; i < len(elf.Programs); i++ {
-		elf.Programs[i].ProgFileSize = uint64(len(elf.Programs[i].Prog))
-		elf.Programs[i].ProgOffset = ElfAddr(offset)
-		elf.Programs[i].ProgAlign = offset % PageSize
-		offset += elf.Programs[i].ProgFileSize
-		if elf.Programs[i].ProgFileSize == 0 { // ad-hocにStack用のセグメントを処理する
-			offset += ElfProgHeaderSize // ヘッダも読み込まれないのでその分の調整がいる
-		} else {
-			elf.Programs[i].ProgMemSize = elf.Programs[i].ProgFileSize // ProgFileSizeが0ならMemSizeはそのままにしておく
-		}
-		if elf.Programs[i].ProgFlags&ProgFlagExecute == ProgFlagExecute {
-			elf.Header.ElfEntry = ElfAddr(ProgEntryAddr + ElfHeaderSize + ElfProgHeaderSize*2)
-			elf.Programs[i].ProgOffset = 0
-			elf.Programs[i].ProgAlign = 0
-			elf.Programs[i].ProgFileSize += ElfHeaderSize + ElfProgHeaderSize*2 // 2 = Prog+Stack
-			elf.Programs[i].ProgMemSize = elf.Programs[i].ProgFileSize
-		}
-	}
+	var offset uint64 = ElfHeaderSize + ElfProgHeaderSize*3
+
+	// .text
+	elf.Programs[0].ProgFileSize = uint64(len(elf.Programs[0].Prog)) + ElfHeaderSize + ElfProgHeaderSize*3 // .text includes ELF Header
+	elf.Programs[0].ProgMemSize = elf.Programs[0].ProgFileSize
+	elf.Programs[0].ProgOffset = 0
+	elf.Programs[0].ProgAlign = 0
+	offset += uint64(len(elf.Programs[0].Prog))
+
+	// .stack
+	elf.Programs[1].ProgFileSize = 0
+	elf.Programs[1].ProgMemSize = stackSize
+	elf.Programs[1].ProgOffset = ElfAddr(offset)  // maybe useless info
+	elf.Programs[1].ProgAlign = offset % PageSize // maybe useless info
+
+	// .global
+	elf.Programs[2].ProgFileSize = uint64(len(elf.Programs[2].Prog))
+	elf.Programs[2].ProgMemSize = elf.Programs[2].ProgFileSize
+	elf.Programs[2].ProgOffset = ElfAddr(offset)
+	elf.Programs[2].ProgAlign = offset % PageSize
+	offset += elf.Programs[2].ProgFileSize
 
 	// StrTable
 	strTableOffset := offset
