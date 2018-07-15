@@ -147,8 +147,8 @@ func assemble(fileName, outputFileName string) error {
 		if isInst {
 			insts = append(insts, strToInst(t))
 		} else {
+			t := strings.TrimSpace(t)
 			s := strings.Split(t, " ")
-			println(t)
 			for _, s := range s {
 				if d, err := strconv.ParseUint(s, 16, 64); err == nil {
 					datum = append(datum, d)
