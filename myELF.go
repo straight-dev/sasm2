@@ -269,6 +269,7 @@ func (elf *ElfFile) Legalize() error {
 	elf.Programs[0].ProgMemSize = elf.Programs[0].ProgFileSize
 	elf.Programs[0].ProgOffset = 0
 	elf.Programs[0].ProgAlign = 0
+	elf.Header.ElfEntry += ElfAddr(offset + uint64(EntryOffset))
 	offset += uint64(len(elf.Programs[0].Prog))
 
 	// .stack

@@ -15,6 +15,8 @@ const dataStartAddr = 0x100
 const initialSP = 0x01000000
 const stackSize = 0x00500000
 
+var EntryOffset = 0
+
 type instruction struct {
 	opCode   OpCode
 	instType InstType
@@ -142,6 +144,9 @@ func assemble(fileName, outputFileName string) error {
 		if t == "Initialize values" {
 			isInst = false
 			continue
+		} else if []rune(t)[0] == '!' {
+			EntryOffset = len(insts) * 4
+			t = t[1:]
 		}
 
 		if isInst {
