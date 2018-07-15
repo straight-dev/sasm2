@@ -165,6 +165,10 @@ func assemble(fileName, outputFileName string) error {
 		t := v.instTobytes()
 		copy(prog[4*i:4*(i+1)], t)
 	}
+	datumbytes := make([]byte, len(datum)*4)
+	for i, v := range datum {
+		binary.LittleEndian.PutUint32(datumbytes[i*4:], uint32(v))
+	}
 
 	progHeader := ElfProgHeader{
 		ProgType:     ProgTypeLoad,
@@ -186,6 +190,17 @@ func assemble(fileName, outputFileName string) error {
 		Prog:         nil,
 	}
 	elf.AddSegment(&stackHeader)
+
+	globalDataHeader := ElfProgHeader{
+		ProgType:     ProgTypeLoad,
+		ProgFlags:    ProgFlagWrite + ProgFlagRead,
+		ProgVAddr:    dataStartAddr,
+		ProgPAddr:    0,
+		ProgFileSize: uint64(len(datumbytes)),
+		ProgMemSize:  uint64(len(datumbytes)),
+		Prog:         datumbytes,
+	}
+	elf.AddSegment(&globalDataHeader)
 
 	secHeader := ElfSecHeader{
 		SecType: SecTypeNull,
