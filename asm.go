@@ -138,7 +138,7 @@ func assemble(fileName, outputFileName string) error {
 
 	scanner := bufio.NewScanner(fp)
 	var insts []instruction
-	var datum []uint64
+	var datum []byte
 	for isInst := true; scanner.Scan(); {
 		t := scanner.Text()
 		if t == "Initialize values" {
@@ -155,8 +155,8 @@ func assemble(fileName, outputFileName string) error {
 			t := strings.TrimSpace(t)
 			s := strings.Split(t, " ")
 			for _, s := range s {
-				if d, err := strconv.ParseUint(s, 16, 64); err == nil {
-					datum = append(datum, d)
+				if d, err := strconv.ParseUint(s, 10, 8); err == nil {
+					datum = append(datum, byte(d))
 				} else {
 					return errors.New("invalid data\n" + err.Error())
 				}
@@ -170,9 +170,9 @@ func assemble(fileName, outputFileName string) error {
 		t := v.instTobytes()
 		copy(prog[4*i:4*(i+1)], t)
 	}
-	datumbytes := make([]byte, len(datum)*4)
+	datumbytes := make([]byte, len(datum)+dataStartAddr)
 	for i, v := range datum {
-		binary.LittleEndian.PutUint32(datumbytes[i*4:], uint32(v))
+		datumbytes[i+dataStartAddr] = v
 	}
 
 	progHeader := ElfProgHeader{
@@ -199,7 +199,7 @@ func assemble(fileName, outputFileName string) error {
 	globalDataHeader := ElfProgHeader{
 		ProgType:     ProgTypeLoad,
 		ProgFlags:    ProgFlagWrite + ProgFlagRead,
-		ProgVAddr:    dataStartAddr,
+		ProgVAddr:    dataStartAddr - dataStartAddr,
 		ProgPAddr:    0,
 		ProgFileSize: uint64(len(datumbytes)),
 		Prog:         datumbytes,
