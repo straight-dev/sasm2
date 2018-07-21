@@ -2,7 +2,7 @@
 
 package straightISAv2Info
 
-import "fmt"
+import "strconv"
 
 const _OpCode_name = "OpNOPOpSYSCALLOpSYSRETOpJOpJROpJALOpJRALOpBEZOpBNZOpADDOpADDiOpSUBOpSUBiOpMULOpMULiOpDIVOpDIViOpDIVUOpDIVUiOpMODOpMODiOpMODUOpMODUiOpSLTOpSLTiOpSLTUOpSLTUiOpFTOIOpITOFOpFADDOpFSUBOpFMULOpFDIVOpFSLTOpSHLOpSHLiOpSHROpSHRiOpSHRAOpSHRAiOpANDOpANDiOpOROpORiOpXOROpXORiOpLUiOpSPADDiOpRPINCOpRMOVOpLDOpLDHOpLDHUOpLDBOpLDBUOpSTOpSTHOpSTBOpSEXT16TO32OpSEXT8TO32OpZEXT16TO32OpZEXT8TO32Op_MAX"
 
@@ -10,7 +10,7 @@ var _OpCode_index = [...]uint16{0, 5, 14, 22, 25, 29, 34, 40, 45, 50, 55, 61, 66
 
 func (i OpCode) String() string {
 	if i < 0 || i >= OpCode(len(_OpCode_index)-1) {
-		return fmt.Sprintf("OpCode(%d)", i)
+		return "OpCode(" + strconv.FormatInt(int64(i), 10) + ")"
 	}
 	return _OpCode_name[_OpCode_index[i]:_OpCode_index[i+1]]
 }
