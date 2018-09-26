@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"encoding/binary"
 	"errors"
 	"os"
 	"strconv"
@@ -15,77 +14,14 @@ const stackSize = 0x00500000
 
 var EntryOffset = 0
 
-type instruction interface {
-	toBytes() []byte
-}
-
-func (inst *instruction) instTobytes() []byte {
-	var i uint32
-	b := make([]byte, 4)
-	i = (uint32(inst.opCode) & 0x3f) << 26
-	imm := uint32(inst.imm)
-	switch inst.instType {
-	case ZeroReg:
-		i += imm & 0x3ffffff
-	case OneReg:
-		i += (uint32(inst.regs[0]) & 0x3ff) << 16
-		i += imm & 0xffff
-	case TwoReg:
-		i += (uint32(inst.regs[0]) & 0x3ff) << 16
-		i += (uint32(inst.regs[1]) & 0x3ff) << 6
-		i += imm & 0x3f
-	}
-	binary.LittleEndian.PutUint32(b, i)
-	return b
-}
-
-var strToOpCodeMap map[string]OpCode
-
-func strToOpCode(s string) (OpCode, error) {
-	// make the map of string2OpCode
-	if len(strToOpCodeMap) == 0 {
-		strToOpCodeMap = make(map[string]OpCode)
-		for i := 0; i < int(Op_MAX); i++ {
-			oc := OpCode(i)
-			strToOpCodeMap[strings.ToLower(oc.String()[2:])] = oc
-		}
-		strToOpCodeMap["undef"] = OpNOP
-	}
-
-	oc, exists := strToOpCodeMap[s]
-	if !exists {
-		return Op_MAX, errors.New("invalid opname")
-	}
-	return oc, nil
-}
-
-func strToInst(s string) instruction {
+func strToInst(s string) (instruction, error) {
 	ss := strings.Fields(s)
-	inst := instruction{}
 
-	if oc, err := strToOpCode(strings.ToLower(ss[0])); err == nil {
-		inst.opCode = oc
-	} else {
-		println(strToOpCodeMap)
-		println(ss[0])
-		panic("invalid op")
+	if _, ok := strToSBOperation[ss[0]]; ok {
+		i, err := fromStringToInstTypeSB(s)
+		return instruction(i), err
 	}
-
-	for i := 1; i < len(ss); i++ {
-		if strings.HasPrefix(ss[i], "$CONST") {
-			constIndex, _ := strconv.ParseUint(ss[i][6:], 10, 64)
-			ss[i] = strconv.FormatUint(dataStartAddr+constIndex*8, 10)
-		}
-	}
-
-	var isImmSignExtended bool
-	inst.instType, isImmSignExtended, _ = GetInstType(inst.opCode)
-	switch inst.instType {
-	case ZeroReg:
-	case OneReg:
-	case TwoReg:
-	}
-	return inst
+	panic("unimplemented yet")
 }
 
 func assemble(fileName, outputFileName string) error {
@@ -109,7 +45,11 @@ func assemble(fileName, outputFileName string) error {
 		}
 
 		if isInst {
-			insts = append(insts, strToInst(t))
+			i, err := strToInst(t)
+			if err != nil {
+				return err
+			}
+			insts = append(insts, i)
 		} else {
 			t := strings.TrimSpace(t)
 			s := strings.Split(t, " ")
@@ -126,8 +66,8 @@ func assemble(fileName, outputFileName string) error {
 	elf := NewELFFile()
 	prog := make([]byte, len(insts)*4)
 	for i, v := range insts {
-		t := v.instTobytes()
-		copy(prog[4*i:4*(i+1)], t)
+		t := v.toBytes()
+		copy(prog[4*i:4*(i+1)], t[:])
 	}
 	datumbytes := make([]byte, len(datum)+dataStartAddr)
 	for i, v := range datum {
