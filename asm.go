@@ -7,8 +7,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-
-	. "github.com/clkbug/sasm2/straightISAv2Info"
 )
 
 const dataStartAddr = 0x100
@@ -17,11 +15,8 @@ const stackSize = 0x00500000
 
 var EntryOffset = 0
 
-type instruction struct {
-	opCode   OpCode
-	instType InstType
-	regs     []uint64
-	imm      uint64
+type instruction interface {
+	toBytes() []byte
 }
 
 func (inst *instruction) instTobytes() []byte {
@@ -87,44 +82,8 @@ func strToInst(s string) instruction {
 	inst.instType, isImmSignExtended, _ = GetInstType(inst.opCode)
 	switch inst.instType {
 	case ZeroReg:
-		if 2 <= len(ss) {
-			var imm uint64
-			if isImmSignExtended {
-				immb, _ := strconv.ParseInt(ss[1], 10, 26)
-				imm = uint64(immb)
-			} else {
-				imm, _ = strconv.ParseUint(ss[1], 10, 26)
-			}
-			inst.imm = extractBits(imm, 26, isImmSignExtended)
-		}
 	case OneReg:
-		reg, _ := strconv.ParseUint(ss[1], 10, 10)
-		inst.regs = append(inst.regs, reg)
-		if 3 <= len(ss) {
-			var imm uint64
-			if isImmSignExtended {
-				immb, _ := strconv.ParseInt(ss[2], 10, 16)
-				imm = uint64(immb)
-			} else {
-				imm, _ = strconv.ParseUint(ss[2], 10, 16)
-			}
-			inst.imm = extractBits(imm, 16, isImmSignExtended)
-		}
 	case TwoReg:
-		reg, _ := strconv.ParseUint(ss[1], 10, 10)
-		inst.regs = append(inst.regs, reg)
-		reg, _ = strconv.ParseUint(ss[2], 10, 10)
-		inst.regs = append(inst.regs, reg)
-		if 4 <= len(ss) {
-			var imm uint64
-			if isImmSignExtended {
-				immb, _ := strconv.ParseInt(ss[3], 10, 6)
-				imm = uint64(immb)
-			} else {
-				imm, _ = strconv.ParseUint(ss[3], 10, 6)
-			}
-			inst.imm = extractBits(imm, 6, isImmSignExtended)
-		}
 	}
 	return inst
 }
