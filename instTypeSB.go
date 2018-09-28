@@ -44,15 +44,6 @@ func (i *instTypeSB) toUInt32() uint32 {
 	return uint32(i.operation) | (i.imm12 << 6) | (i.srcRegs[1] << 19) | (i.srcRegs[0] << 25)
 }
 
-func (i *instTypeSB) toBytes() [4]byte {
-	word := i.toUInt32()
-	bs := [4]byte{}
-	for i := 0; i < 4; i++ {
-		bs[i] = byte((word >> uint(8*i)) & 0xff)
-	}
-	return bs
-}
-
 func fromStringToInstTypeSB(str string) (*instTypeSB, error) {
 	ss := strings.Fields(str)
 	i := instTypeSB{}

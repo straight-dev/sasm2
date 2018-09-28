@@ -39,15 +39,6 @@ func (i *instTypeMAC) toUInt32() uint32 {
 	return uint32(i.operation) | (uint32(i.rm) << 8) | (i.srcRegs[2] << 11) | (i.srcRegs[1] << 18) | (i.srcRegs[0] << 25)
 }
 
-func (i *instTypeMAC) toBytes() [4]byte {
-	word := i.toUInt32()
-	bs := [4]byte{}
-	for i := 0; i < 4; i++ {
-		bs[i] = byte((word >> uint(8*i)) & 0xff)
-	}
-	return bs
-}
-
 // fromStringToInstTypeMAC
 // example: "FMADD.s 1 2 3 RDN" (RM is optional)
 func fromStringToInstTypeMAC(str string) (*instTypeMAC, error) {
@@ -57,7 +48,7 @@ func fromStringToInstTypeMAC(str string) (*instTypeMAC, error) {
 	op, ok := strToMacOperation[ss[0]]
 	if !ok {
 		println(strToMacOperation)
-		return nil, fmt.Errorf("not found '%s' in strTomacOperation :'%s'", ss[0], str)
+		return nil, fmt.Errorf("not found '%s' in strToMacOperation :'%s'", ss[0], str)
 	}
 	i.operation = op
 

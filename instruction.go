@@ -8,7 +8,15 @@ import (
 // Instruction interface
 type instruction interface {
 	toUInt32() uint32
-	toBytes() [4]byte
+}
+
+func instToBytes(inst instruction) [4]byte {
+	word := inst.toUInt32()
+	bs := [4]byte{}
+	for i := 0; i < 4; i++ {
+		bs[i] = byte((word >> uint(8*i)) & 0xff)
+	}
+	return bs
 }
 
 type roundmode uint32
@@ -16,11 +24,11 @@ type roundmode uint32
 const (
 	rmRNE       roundmode = iota // Round to Nearest, ties to Even
 	rmRTZ                        // Round towards Zero
-	rmRDN                        //Round Down (towards -inf)
-	rmRUP                        //Round Up (towards +inf)
+	rmRDN                        // Round Down (towards -inf)
+	rmRUP                        // Round Up (towards +inf)
 	rmRMM                        // Round to Nearest, ties to Max Magnitude
 	rmReserved1                  // Invalid
-	rmReserved2                  //Invalid
+	rmReserved2                  // Invalid
 	rmDynamic                    // Dynamic Rounding Mide
 )
 

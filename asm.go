@@ -66,7 +66,7 @@ func assemble(fileName, outputFileName string) error {
 	elf := NewELFFile()
 	prog := make([]byte, len(insts)*4)
 	for i, v := range insts {
-		t := v.toBytes()
+		t := instToBytes(v)
 		copy(prog[4*i:4*(i+1)], t[:])
 	}
 	datumbytes := make([]byte, len(datum)+dataStartAddr)
