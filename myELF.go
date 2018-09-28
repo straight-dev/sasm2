@@ -19,6 +19,7 @@ type ElfVersym uint16
 // ProgEntryAddr : Entry address of this program (precise entry address is ProgEntryAddr + the ELF Header and Segment Headers' offset)
 const ProgEntryAddr = 0x020000000
 
+// e_ident
 const (
 	ElfIdentCLASS      = 4  /* Class of machine. */
 	ElfIdentDATA       = 5  /* Data format. */
@@ -29,38 +30,46 @@ const (
 	ElfIdentNIDENT     = 16 /* Size of e_ident array. */
 )
 
+// EI_CLASS
 const (
 	ElfIdentClassNone = 0
 	ElfIdentClass32   = 1
 	ElfIdentClass64   = 2
 )
 
+// EI_DATA
 const (
 	ElfIdentDataNone = 0
 	ElfIdentData2LSB = 1 // Little Endian
 	ElfIdentData2MSB = 2 // Big Endian
 )
 
+// ElfType : object file type
 type ElfType uint16
 
+// e_type
 const (
 	ElfTypeNone ElfType = 0 /* Unknown type. */
 	ElfTypeRel  ElfType = 1 /* Relocatable. */
 	ElfTypeExec ElfType = 2 /* Executable. */
 )
 
+// ElfMachine : Architecture
 type ElfMachine uint16
 
 // ElfMachineSTRAIGHT is the machine code of STRAIGHT; found in elf.Header.Machine
 const ElfMachineSTRAIGHT ElfMachine = 256
 
+// ElfVersion : file version
 type ElfVersion uint32
 
+// e_version
 const (
 	ElfVersionNone    ElfVersion = 0
 	ElfVersionCurrent ElfVersion = 1
 )
 
+// ElfHeader : Header of ELF
 type ElfHeader struct {
 	ElfIdent      [16]byte
 	ElfType       ElfType
@@ -78,20 +87,27 @@ type ElfHeader struct {
 	ElfSHStrIndex uint16
 }
 
+// ProgType :
 type ProgType uint32
 
+// p_type
 const (
 	ProgTypeNull    ProgType = 0 // ignore this entry
 	ProgTypeLoad    ProgType = 1 // Loadable
 	ProgTypePHeader ProgType = 6 // ProgHeader
 )
+
+// ProgFlag : bitmask
 const (
 	ProgFlagExecute = 1
 	ProgFlagWrite   = 2
 	ProgFlagRead    = 4
 )
 
+// Elf Segment : segment
 type ElfSegment []byte
+
+// ElfProgHeader : segment header
 type ElfProgHeader struct {
 	ProgType     ProgType
 	ProgFlags    uint32
@@ -104,10 +120,13 @@ type ElfProgHeader struct {
 	Prog         ElfSegment
 }
 
+// ElfProgHeaderSize = sizeof(ElfProgHeader)
 const ElfProgHeaderSize = (32*2 + 64*6) / 8 // bytes
 
+// SecType : Section type
 type SecType uint32
 
+// SecTypes
 const (
 	SecTypeNull SecType = iota
 	SecTypeProgBits
@@ -123,6 +142,7 @@ const (
 	SecTypeHiUser SecType = 0xf8ffffff
 )
 
+// Section Header bitmask
 const (
 	SHFlagWrite     = 0x1
 	SHFlagAlloc     = 0x2
@@ -130,7 +150,10 @@ const (
 	SHFlagMaskProc  = 0xF0000000
 )
 
+// ElfSection :
 type ElfSection []byte
+
+// ElfSecHeader : section header
 type ElfSecHeader struct {
 	SecName      uint32
 	SecType      SecType
@@ -145,14 +168,17 @@ type ElfSecHeader struct {
 	Sec          ElfSection
 }
 
+// ElfSecHeaderSize = sizeof(ElfSecHeader)
 const ElfSecHeaderSize = (32*4 + 64*6) / 8 // bytes
 
+// ElfFile : ElfFile structure
 type ElfFile struct {
 	Header   ElfHeader
 	Programs []*ElfProgHeader
 	Sections []*ElfSecHeader
 }
 
+// ElfHeaderSize = sizeof(Header)
 const ElfHeaderSize = 64
 
 func NewELFHeader() ElfHeader {
@@ -269,7 +295,7 @@ func (elf *ElfFile) Legalize() error {
 	elf.Programs[0].ProgMemSize = elf.Programs[0].ProgFileSize
 	elf.Programs[0].ProgOffset = 0
 	elf.Programs[0].ProgAlign = 0
-	elf.Header.ElfEntry += ElfAddr(offset + uint64(EntryOffset))
+	elf.Header.ElfEntry += ElfAddr(offset + uint64(entryOffset))
 	offset += uint64(len(elf.Programs[0].Prog))
 
 	// .stack

@@ -12,7 +12,7 @@ const dataStartAddr = 0x100
 const initialSP = 0x01000000
 const stackSize = 0x00500000
 
-var EntryOffset = 0
+var entryOffset = 0
 
 func strToInst(s string) (instruction, error) {
 	ss := strings.Fields(s)
@@ -40,7 +40,7 @@ func assemble(fileName, outputFileName string) error {
 			isInst = false
 			continue
 		} else if []rune(t)[0] == '!' {
-			EntryOffset = len(insts) * 4
+			entryOffset = len(insts) * 4
 			t = t[1:]
 		}
 

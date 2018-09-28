@@ -195,7 +195,7 @@ func fromStringToInstTypeOneReg(str string) (*instTypeOneReg, error) {
 				if imm != imm&0x1f {
 					return nil, fmt.Errorf("S(L|R)(L|A)i? 's imm: 6bit ")
 				}
-				var funct uint32 = 0
+				var funct uint32
 				if ss[0] == "SRAi.32" || ss[0] == "SRAi.64" {
 					funct = 1 << 3
 				}
