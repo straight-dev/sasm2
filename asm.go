@@ -21,6 +21,22 @@ func strToInst(s string) (instruction, error) {
 		i, err := fromStringToInstTypeSB(s)
 		return instruction(i), err
 	}
+
+	if _, ok := strToMacOperation[ss[0]]; ok {
+		i, err := fromStringToInstTypeMAC(s)
+		return instruction(i), err
+	}
+
+	if _, ok := strToOneRegOperation[ss[0]]; ok {
+		i, err := fromStringToInstTypeOneReg(s)
+		return instruction(i), err
+	}
+
+	if _, ok := strToTwoRegOperation[ss[0]]; ok {
+		i, err := fromStringToInstTypeTwoReg(s)
+		return instruction(i), err
+	}
+
 	panic("unimplemented yet")
 }
 
