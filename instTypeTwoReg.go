@@ -86,7 +86,7 @@ var strToTwoRegOperation = map[string]twoRegOperation{
 }
 
 func (i *instTypeTwoReg) toUInt32() uint32 {
-	return uint32(i.operation) | i.srcRegs[0]<<18 | i.srcRegs[1]<<25
+	return uint32(i.operation) | i.srcRegs[0]<<25 | i.srcRegs[1]<<18
 }
 
 func fromStringToInstTypeTwoReg(str string) (*instTypeTwoReg, error) {
