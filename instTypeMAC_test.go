@@ -16,11 +16,21 @@ func TestFromStringToInstTypeMAC(t *testing.T) {
 		}
 
 	}
-	expected := instTypeMAC{
-		operation: opFMADDd,
-		rm:        rmRDN,
-		srcRegs:   [3]uint32{1, 2, 3},
+	var mactests = []struct {
+		in       string
+		expected instTypeMAC
+	}{
+		{
+			"FMADD.d 1 2 3 RDN",
+			instTypeMAC{
+				operation: opFMADDd,
+				rm:        rmRDN,
+				srcRegs:   [3]uint32{1, 2, 3},
+			},
+		},
 	}
-	compare("FMADD.d 1 2 3 RDN", expected)
+	for _, e := range mactests {
+		compare(e.in, e.expected)
+	}
 
 }

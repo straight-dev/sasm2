@@ -62,14 +62,14 @@ func fromStringToInstTypeSB(str string) (*instTypeSB, error) {
 	for j := 0; j < 2; j++ {
 		t, err := strconv.ParseUint(ss[j+1], 10, 8)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to ParseUint '%s' in %s: %s", ss[j+1], str, err)
 		}
 		i.srcRegs[j] = uint32(t)
 	}
 
 	t, err := strconv.ParseInt(ss[3], 10, 12)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to ParseUint '%s' in %s: %s", ss[3], str, err)
 	}
 	i.imm12 = uint32(t)
 

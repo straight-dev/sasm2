@@ -59,7 +59,7 @@ func fromStringToInstTypeMAC(str string) (*instTypeMAC, error) {
 	for j := 0; j < 3; j++ {
 		t, err := strconv.ParseUint(ss[j+1], 10, 8)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to ParseUint '%s' in %s: %s", ss[j+1], str, err)
 		}
 		i.srcRegs[j] = uint32(t)
 	}
@@ -67,7 +67,7 @@ func fromStringToInstTypeMAC(str string) (*instTypeMAC, error) {
 	if len(ss) >= 5 {
 		rm, err := fromStringToRM(ss[4])
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to fromStringToRM '%s' in %s: %s", ss[4], str, err)
 		}
 		i.rm = rm
 	}
