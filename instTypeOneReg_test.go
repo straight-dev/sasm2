@@ -41,8 +41,24 @@ func TestFromStringToInstTypeOneReg(t *testing.T) {
 			"LD.8 	124 30",
 			instTypeOneReg{
 				operation: opLD8,
-				imm:       30,
 				srcReg:    124,
+				imm:       30,
+			},
+		},
+		{
+			"SRLi.32 12 24",
+			instTypeOneReg{
+				operation: opSRLi32,
+				srcReg:    12,
+				imm:       24 << 5,
+			},
+		},
+		{
+			"SRAi.64 12 24",
+			instTypeOneReg{
+				operation: opSRLi64,
+				srcReg:    12,
+				imm:       24<<5 | 8,
 			},
 		},
 	}

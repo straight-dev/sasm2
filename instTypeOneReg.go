@@ -70,6 +70,7 @@ type instTypeOneReg struct {
 }
 
 var strToOneRegOperation = map[string]oneRegOperation{
+	// Specifications: p1
 	"NOP":      opRPINC, // NOP = RPINC 0
 	"RPINC":    opRPINC,
 	"FENCE":    opFENCE,
@@ -103,6 +104,7 @@ var strToOneRegOperation = map[string]oneRegOperation{
 	"LD.16u":   opLD16u,
 	"LD.32u":   opLD32u,
 
+	// Specifications: p4
 	"ADDi.32":  opADDi32,
 	"SLTi.32":  opSLTi32,
 	"SLTiu.32": opSLTiu32,
