@@ -8,8 +8,7 @@ An assembler for STRAIGHT
     sasm2 -file input.s -output a.out
 
 ## Build
-    cd straightISAv2Info
-    python3 specification.csv
-    go generate
-    cd ../
     go build
+
+## Test
+    go test
