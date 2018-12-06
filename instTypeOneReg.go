@@ -142,9 +142,9 @@ func fromStringToInstTypeOneReg(str string) (*instTypeOneReg, error) {
 		if ss[0] == "RPINC" {
 			t, err := strconv.ParseUint(ss[1], 10, 7)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("failed to parse %s (OneReg instruction '%s' opRPINC): %s", ss[1], str, err)
 			}
-			i.srcReg = uint32(t)
+			i.imm = uint32(t)
 		} // else -> NOP
 
 	case opFENCE: // FENCE succ(4bit) pred(4bit)
@@ -154,11 +154,11 @@ func fromStringToInstTypeOneReg(str string) (*instTypeOneReg, error) {
 			}
 			succ, err := strconv.ParseUint(ss[1], 10, 4)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("failed to parse %s (OneReg instruction '%s' opFENCE): %s", ss[1], str, err)
 			}
 			pred, err := strconv.ParseUint(ss[2], 10, 4)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("failed to parse %s (OneReg instruction '%s' opFENCE): %s", ss[2], str, err)
 			}
 			i.imm = uint32(pred | (succ << 4))
 		}
@@ -183,12 +183,12 @@ func fromStringToInstTypeOneReg(str string) (*instTypeOneReg, error) {
 			}
 			srcReg1, err := strconv.ParseUint(ss[1], 10, 7) // srcReg1 or zImm
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("failed to parse %s (OneReg instruction '%s'): %s", ss[1], str, err)
 			}
 			i.srcReg = uint32(srcReg1)
 			imm, err := strconv.ParseUint(ss[2], 10, 12) // Imm or CSR
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("failed to parse %s (OneReg instruction '%s'): %s", ss[2], str, err)
 			}
 
 			if isShift(op) {
@@ -213,7 +213,7 @@ func fromStringToInstTypeOneReg(str string) (*instTypeOneReg, error) {
 			}
 			imm, err := strconv.ParseUint(ss[1], 10, 12) // Imm
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("failed to parse %s (OneReg instruction '%s' opSPLD): %s", ss[1], str, err)
 			}
 			i.imm = uint32(imm)
 		}
