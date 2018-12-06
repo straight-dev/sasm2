@@ -17,7 +17,7 @@ func TestFromStringToInstTypeSB(t *testing.T) {
 
 	}
 
-	var mactests = []struct {
+	var table = []struct {
 		in       string
 		expected instTypeSB
 	}{
@@ -30,7 +30,7 @@ func TestFromStringToInstTypeSB(t *testing.T) {
 			},
 		},
 	}
-	for _, e := range mactests {
+	for _, e := range table {
 		compare(e.in, e.expected)
 	}
 

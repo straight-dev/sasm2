@@ -17,7 +17,7 @@ func TestFromStringToInstTypeOneReg(t *testing.T) {
 
 	}
 
-	var oneregtests = []struct {
+	var table = []struct {
 		in       string
 		expected instTypeOneReg
 	}{
@@ -62,7 +62,7 @@ func TestFromStringToInstTypeOneReg(t *testing.T) {
 			},
 		},
 	}
-	for _, e := range oneregtests {
+	for _, e := range table {
 		compare(e.in, e.expected)
 	}
 }
