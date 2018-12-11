@@ -65,7 +65,7 @@ const (
 
 type instTypeOneReg struct {
 	operation oneRegOperation // 13 bit
-	imm       uint32          // 12 bit (Imm, CSR, 0 or 1)
+	imm12     uint32          // 12 bit (Imm, CSR, 0 or 1)
 	srcReg    uint32          // 7 bit
 }
 
@@ -126,7 +126,7 @@ var strToOneRegOperation = map[string]oneRegOperation{
 }
 
 func (i *instTypeOneReg) toUInt32() uint32 {
-	return uint32(i.operation) | (i.imm << 13) | (i.srcReg << 25)
+	return uint32(i.operation) | (i.imm12 << 13) | (i.srcReg << 25)
 }
 
 func fromStringToInstTypeOneReg(str string) (*instTypeOneReg, error) {
@@ -146,7 +146,7 @@ func fromStringToInstTypeOneReg(str string) (*instTypeOneReg, error) {
 			if err != nil {
 				return nil, fmt.Errorf("failed to parse %s (OneReg instruction '%s' opRPINC): %s", ss[1], str, err)
 			}
-			i.imm = uint32(t)
+			i.imm12 = uint32(t)
 		} // else -> NOP
 
 	case opFENCE: // FENCE succ(4bit) pred(4bit)
@@ -162,7 +162,7 @@ func fromStringToInstTypeOneReg(str string) (*instTypeOneReg, error) {
 			if err != nil {
 				return nil, fmt.Errorf("failed to parse %s (OneReg instruction '%s' opFENCE): %s", ss[2], str, err)
 			}
-			i.imm = uint32(pred | (succ << 4))
+			i.imm12 = uint32(pred | (succ << 4))
 		}
 
 	case opFENCEI:
@@ -170,7 +170,7 @@ func fromStringToInstTypeOneReg(str string) (*instTypeOneReg, error) {
 
 	case opECALL:
 		if ss[0] == "EBREAK" {
-			i.imm = 1
+			i.imm12 = 1
 		} // else -> ECALL (i.imm = 1)
 
 	case opJR, opJALR,
@@ -188,7 +188,7 @@ func fromStringToInstTypeOneReg(str string) (*instTypeOneReg, error) {
 				return nil, fmt.Errorf("failed to parse %s (OneReg instruction '%s'): %s", ss[1], str, err)
 			}
 			i.srcReg = uint32(srcReg1)
-			imm, err := strconv.ParseUint(ss[2], 10, 12) // Imm or CSR
+			imm, err := strconv.ParseInt(ss[2], 10, 12) // Imm or CSR
 			if err != nil {
 				return nil, fmt.Errorf("failed to parse %s (OneReg instruction '%s'): %s", ss[2], str, err)
 			}
@@ -201,9 +201,9 @@ func fromStringToInstTypeOneReg(str string) (*instTypeOneReg, error) {
 				if ss[0] == "SRAi.32" || ss[0] == "SRAi.64" {
 					funct = 1 << 3
 				}
-				i.imm = uint32(imm&0x1f)<<5 | funct
+				i.imm12 = uint32(imm&0x1f)<<5 | funct
 			} else {
-				i.imm = uint32(imm)
+				i.imm12 = uint32(imm)
 			}
 		}
 
@@ -217,7 +217,7 @@ func fromStringToInstTypeOneReg(str string) (*instTypeOneReg, error) {
 			if err != nil {
 				return nil, fmt.Errorf("failed to parse %s (OneReg instruction '%s' opSPLD): %s", ss[1], str, err)
 			}
-			i.imm = uint32(imm)
+			i.imm12 = uint32(imm)
 		}
 
 	default:

@@ -25,7 +25,7 @@ func TestFromStringToInstTypeOneReg(t *testing.T) {
 			"NOP",
 			instTypeOneReg{
 				operation: opRPINC,
-				imm:       0,
+				imm12:     0,
 				srcReg:    0,
 			},
 		},
@@ -33,7 +33,7 @@ func TestFromStringToInstTypeOneReg(t *testing.T) {
 			"RPINC 100",
 			instTypeOneReg{
 				operation: opRPINC,
-				imm:       100,
+				imm12:     100,
 				srcReg:    0,
 			},
 		},
@@ -42,7 +42,7 @@ func TestFromStringToInstTypeOneReg(t *testing.T) {
 			instTypeOneReg{
 				operation: opLD8,
 				srcReg:    124,
-				imm:       30,
+				imm12:     30,
 			},
 		},
 		{
@@ -50,7 +50,7 @@ func TestFromStringToInstTypeOneReg(t *testing.T) {
 			instTypeOneReg{
 				operation: opSRLi32,
 				srcReg:    12,
-				imm:       24 << 5,
+				imm12:     24 << 5,
 			},
 		},
 		{
@@ -58,7 +58,7 @@ func TestFromStringToInstTypeOneReg(t *testing.T) {
 			instTypeOneReg{
 				operation: opSRLi64,
 				srcReg:    12,
-				imm:       24<<5 | 8,
+				imm12:     24<<5 | 8,
 			},
 		},
 	}
