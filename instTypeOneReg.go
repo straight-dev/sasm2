@@ -178,7 +178,8 @@ func fromStringToInstTypeOneReg(str string) (*instTypeOneReg, error) {
 		opLD8, opLD16, opLD32, opLD64, opLD8u, opLD16u, opLD32u,
 		opADDi32, opSLTi32, opSLTiu32, opXORi32, opORi32, opANDi32,
 		opADDi64, opSLTi64, opSLTiu64, opXORi64, opORi64, opANDi64,
-		opSLLi32, opSRLi32, opSLLi64, opSRLi64:
+		opSLLi32, opSRLi32, opSLLi64, opSRLi64,
+		opSPST8, opSPST16, opSPST32, opSPST64:
 		{
 			if len(ss) < 3 {
 				return nil, fmt.Errorf("too few arg: %s", str)
@@ -221,6 +222,7 @@ func fromStringToInstTypeOneReg(str string) (*instTypeOneReg, error) {
 		}
 
 	default:
+		println("op ", op)
 		panic("can't reach here...exhaustive switch in fromStringToInstTypeOneReg")
 	}
 	return &i, nil
