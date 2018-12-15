@@ -41,7 +41,7 @@ var strToSBOperation = map[string]sbOperation{
 }
 
 func (i *instTypeSB) toUInt32() uint32 {
-	return uint32(i.operation) | (i.imm12 << 6) | (i.srcRegs[1] << 19) | (i.srcRegs[0] << 25)
+	return uint32(i.operation) | (i.imm12 << 6) | (i.srcRegs[1] << 18) | (i.srcRegs[0] << 25)
 }
 
 func fromStringToInstTypeSB(str string) (*instTypeSB, error) {
