@@ -204,7 +204,7 @@ func fromStringToInstTypeOneReg(str string) (*instTypeOneReg, error) {
 				}
 				i.imm12 = uint32(imm&0x1f)<<5 | funct
 			} else {
-				i.imm12 = uint32(imm)
+				i.imm12 = uint32(imm) & 0xfff
 			}
 		}
 
@@ -214,11 +214,11 @@ func fromStringToInstTypeOneReg(str string) (*instTypeOneReg, error) {
 			if len(ss) < 2 {
 				return nil, fmt.Errorf("too few arg: %s", str)
 			}
-			imm, err := strconv.ParseUint(ss[1], 10, 12) // Imm
+			imm, err := strconv.ParseInt(ss[1], 10, 12) // Imm
 			if err != nil {
 				return nil, fmt.Errorf("failed to parse %s (OneReg instruction '%s' opSPLD): %s", ss[1], str, err)
 			}
-			i.imm12 = uint32(imm)
+			i.imm12 = uint32(imm & (1<<12 - 1))
 		}
 
 	default:
