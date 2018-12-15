@@ -109,7 +109,7 @@ func assemble(fileName, outputFileName string) error {
 	stackHeader := ElfProgHeader{
 		ProgType:     ProgTypeLoad,
 		ProgFlags:    ProgFlagWrite + ProgFlagRead,
-		ProgVAddr:    initialSP,
+		ProgVAddr:    initialSP - stackSize,
 		ProgPAddr:    0,
 		ProgFileSize: 0,
 		ProgMemSize:  stackSize,
