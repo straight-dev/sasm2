@@ -195,14 +195,14 @@ func fromStringToInstTypeOneReg(str string) (*instTypeOneReg, error) {
 			}
 
 			if isShift(op) {
-				if imm != imm&0x1f {
-					return nil, fmt.Errorf("S(L|R)(L|A)i? 's imm: 6bit ")
+				if imm != imm&0x3f {
+					return nil, fmt.Errorf("invalid immediate %d (Shift operation's imm: 6bit)", imm)
 				}
 				var funct uint32
 				if ss[0] == "SRAi.32" || ss[0] == "SRAi.64" {
 					funct = 1 << 3
 				}
-				i.imm12 = uint32(imm&0x1f)<<5 | funct
+				i.imm12 = uint32(imm&0x3f)<<5 | funct
 			} else {
 				i.imm12 = uint32(imm) & 0xfff
 			}
