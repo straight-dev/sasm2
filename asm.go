@@ -42,6 +42,11 @@ func strToInst(s string) (instruction, error) {
 		return instruction(i), err
 	}
 
+	if _, ok := strToFloatOperation[ss[0]]; ok {
+		i, err := fromStringToInstTypeFloat(s)
+		return instruction(i), err
+	}
+
 	println(s, ss[0])
 	panic("unimplemented yet")
 }
