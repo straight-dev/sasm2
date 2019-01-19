@@ -9,7 +9,7 @@ import (
 )
 
 const dataStartAddr = 0x100
-const initialSP = 0x01000000
+const initialSP = 0x0b000000
 const stackSize = 0x00500000
 
 var entryOffset = 0
@@ -128,9 +128,13 @@ func assemble(fileName, outputFileName string) error {
 		ProgVAddr:    dataStartAddr - dataStartAddr,
 		ProgPAddr:    0,
 		ProgFileSize: uint64(len(datumbytes)),
+		ProgMemSize:  33554432,
 		Prog:         datumbytes,
 	}
 	elf.AddSegment(&globalDataHeader)
+	if uint64(len(datumbytes)) > 33554432 {
+		panic("too much global data")
+	}
 
 	secHeader := ElfSecHeader{
 		SecType: SecTypeNull,

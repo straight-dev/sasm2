@@ -306,7 +306,6 @@ func (elf *ElfFile) Legalize() error {
 
 	// .global
 	elf.Programs[2].ProgFileSize = uint64(len(elf.Programs[2].Prog))
-	elf.Programs[2].ProgMemSize = elf.Programs[2].ProgFileSize
 	elf.Programs[2].ProgOffset = ElfAddr(offset)
 	elf.Programs[2].ProgAlign = offset % PageSize
 	offset += elf.Programs[2].ProgFileSize
