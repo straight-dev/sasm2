@@ -51,14 +51,15 @@ const (
 	opSLLi32  oneRegOperation = 4431 // 10_001_0_1001111
 	opSRLi32  oneRegOperation = 5455 // 10_101_0_1001111
 	// opSRAi32  oneRegOperation = 5455 // 10_101_0_1001111
-	opADDi64  oneRegOperation = 4303 // 10_000_1_1001111
-	opSLTi64  oneRegOperation = 4815 // 10_010_1_1001111
-	opSLTiu64 oneRegOperation = 5071 // 10_011_1_1001111
-	opXORi64  oneRegOperation = 5327 // 10_100_1_1001111
-	opORi64   oneRegOperation = 5839 // 10_110_1_1001111
-	opANDi64  oneRegOperation = 6095 // 10_111_1_1001111
-	opSLLi64  oneRegOperation = 4559 // 10_001_1_1001111
-	opSRLi64  oneRegOperation = 5583 // 10_101_1_1001111
+	opADDi64  oneRegOperation = 4303    // 10_000_1_1001111
+	opRMOV    oneRegOperation = 9999999 // RMOV [x] = ADDi.64 [x] 0
+	opSLTi64  oneRegOperation = 4815    // 10_010_1_1001111
+	opSLTiu64 oneRegOperation = 5071    // 10_011_1_1001111
+	opXORi64  oneRegOperation = 5327    // 10_100_1_1001111
+	opORi64   oneRegOperation = 5839    // 10_110_1_1001111
+	opANDi64  oneRegOperation = 6095    // 10_111_1_1001111
+	opSLLi64  oneRegOperation = 4559    // 10_001_1_1001111
+	opSRLi64  oneRegOperation = 5583    // 10_101_1_1001111
 	// opSRAi64  oneRegOperation = 5583 // 10_101_1_1001111
 
 )
@@ -105,28 +106,34 @@ var strToOneRegOperation = map[string]oneRegOperation{
 	"LD.32u":   opLD32u,
 
 	// Specifications: p4
-	"ADDi.32":  opADDi32,
-	"SLTi.32":  opSLTi32,
-	"SLTiu.32": opSLTiu32,
-	"XORi.32":  opXORi32,
-	"ORi.32":   opORi32,
-	"ANDi.32":  opANDi32,
-	"SLLi.32":  opSLLi32,
-	"SRLi.32":  opSRLi32, // imm = 0_xxxxxx_00000
-	"SRAi.32":  opSRLi32, // imm = 0_xxxxxx_01000
-	"ADDi.64":  opADDi64,
-	"SLTi.64":  opSLTi64,
-	"SLTiu.64": opSLTiu64,
-	"XORi.64":  opXORi64,
-	"ORi.64":   opORi64,
-	"ANDi.64":  opANDi64,
-	"SLLi.64":  opSLLi64,
-	"SRLi.64":  opSRLi64, // imm = 0_xxxxxx_00000
-	"SRAi.64":  opSRLi64, // imm = 0_xxxxxx_01000
+	"ADDi.32":     opADDi32,
+	"SLTi.32":     opSLTi32,
+	"SLTiu.32":    opSLTiu32,
+	"XORi.32":     opXORi32,
+	"ORi.32":      opORi32,
+	"ANDi.32":     opANDi32,
+	"SLLi.32":     opSLLi32,
+	"SRLi.32":     opSRLi32, // imm = 0_xxxxxx_00000
+	"SRAi.32":     opSRLi32, // imm = 0_xxxxxx_01000
+	"ADDi.64":     opADDi64,
+	"RMOV":        opRMOV,
+	"BITCASTITOD": opRMOV, //
+	"SLTi.64":     opSLTi64,
+	"SLTiu.64":    opSLTiu64,
+	"XORi.64":     opXORi64,
+	"ORi.64":      opORi64,
+	"ANDi.64":     opANDi64,
+	"SLLi.64":     opSLLi64,
+	"SRLi.64":     opSRLi64, // imm = 0_xxxxxx_00000
+	"SRAi.64":     opSRLi64, // imm = 0_xxxxxx_01000
 }
 
 func (i *instTypeOneReg) toUInt32() uint32 {
-	return uint32(i.operation) | (i.imm12 << 13) | (i.srcReg << 25)
+	op := i.operation
+	if i.operation == opRMOV {
+		op = opADDi64
+	}
+	return uint32(op) | (i.imm12 << 13) | (i.srcReg << 25)
 }
 
 func fromStringToInstTypeOneReg(str string) (*instTypeOneReg, error) {
@@ -221,6 +228,17 @@ func fromStringToInstTypeOneReg(str string) (*instTypeOneReg, error) {
 			i.imm12 = uint32(imm & (1<<12 - 1))
 		}
 
+	case opRMOV:
+		{
+			if len(ss) < 2 {
+				return nil, fmt.Errorf("too few arg: %s", str)
+			}
+			srcReg1, err := strconv.ParseUint(ss[1], 10, 7) // srcReg1 or zImm
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse %s (OneReg instruction '%s'): %s", ss[1], str, err)
+			}
+			i.srcReg = uint32(srcReg1)
+		}
 	default:
 		println("op ", op)
 		panic("can't reach here...exhaustive switch in fromStringToInstTypeOneReg")

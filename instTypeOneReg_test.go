@@ -61,6 +61,14 @@ func TestFromStringToInstTypeOneReg(t *testing.T) {
 				imm12:     24<<5 | 8,
 			},
 		},
+		{
+			"RMOV 10",
+			instTypeOneReg{
+				operation: opRMOV,
+				srcReg:    10,
+				imm12:     0,
+			},
+		},
 	}
 	for _, e := range table {
 		compare(e.in, e.expected)
