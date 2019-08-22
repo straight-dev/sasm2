@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-const dataStartAddr = 0x100
+const dataStartAddr = 0x10000
 const initialSP = 0x0b000000
 const stackSize = 0x00500000
 
