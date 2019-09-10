@@ -9,7 +9,7 @@ import (
 )
 
 const dataStartAddr = 0x10000
-const initialSP = 0x0b000000
+const initialSP = 0x0afffffc
 const stackSize = 0x00500000
 
 var entryOffset = 0
