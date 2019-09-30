@@ -30,6 +30,9 @@ const (
 	opOR64     twoRegOperation = 7887  // 00000_11_110_1_1001111
 	opAND64    twoRegOperation = 8143  // 00000_11_111_1_1001111
 	opMUL32    twoRegOperation = 14415 // 00001_11_000_0_1001111
+	opMULH32   twoRegOperation = 14671 // 00001_11_001_0_1001111
+	opMULHsu32 twoRegOperation = 14927 // 00001_11_010_0_1001111
+	opMULHu32  twoRegOperation = 15183 // 00001_11_011_0_1001111
 	opDIV32    twoRegOperation = 15439 // 00001_11_100_0_1001111
 	opDIVu32   twoRegOperation = 15695 // 00001_11_101_0_1001111
 	opREM32    twoRegOperation = 15951 // 00001_11_110_0_1001111
@@ -71,6 +74,9 @@ var strToTwoRegOperation = map[string]twoRegOperation{
 	"OR.64":     opOR64,
 	"AND.64":    opAND64,
 	"MUL.32":    opMUL32,
+	"MULH.32":   opMULH32,
+	"MULHsu.32": opMULHsu32,
+	"MULHu.32":  opMULHu32,
 	"DIV.32":    opDIV32,
 	"DIVu.32":   opDIVu32,
 	"REM.32":    opREM32,
