@@ -153,7 +153,7 @@ func fromStringToInstTypeOneReg(str string) (*instTypeOneReg, error) {
 			if err != nil {
 				return nil, fmt.Errorf("failed to parse %s (OneReg instruction '%s' opRPINC): %s", ss[1], str, err)
 			}
-			i.imm12 = uint32(t)
+			i.srcReg = uint32(t)
 		} // else -> NOP
 
 	case opFENCE: // FENCE succ(4bit) pred(4bit)
