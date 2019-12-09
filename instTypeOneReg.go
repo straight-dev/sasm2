@@ -30,6 +30,7 @@ const (
 	opSPLD8u  oneRegOperation = 4623 // 100_100_0001111
 	opSPLD16u oneRegOperation = 5647 // 101_100_0001111
 	opSPLD32u oneRegOperation = 6671 // 110_100_0001111
+	opSPLD32f oneRegOperation = 7695 // 111_100_0001111
 	opSPST8   oneRegOperation = 655  // 000_101_0001111
 	opSPST16  oneRegOperation = 1679 // 001_101_0001111
 	opSPST32  oneRegOperation = 2703 // 010_101_0001111
@@ -41,6 +42,7 @@ const (
 	opLD8u    oneRegOperation = 4879 // 100_110_0001111
 	opLD16u   oneRegOperation = 5903 // 101_110_0001111
 	opLD32u   oneRegOperation = 6927 // 110_110_0001111
+	opLD32f   oneRegOperation = 7951 // 111_110_0001111
 
 	opADDi32  oneRegOperation = 4175 // 10_000_0_1001111
 	opSLTi32  oneRegOperation = 4687 // 10_010_0_1001111
@@ -93,6 +95,7 @@ var strToOneRegOperation = map[string]oneRegOperation{
 	"SPLD.8u":  opSPLD8u,
 	"SPLD.16u": opSPLD16u,
 	"SPLD.32u": opSPLD32u,
+	"SPLD.f32": opSPLD32f,
 	"SPST.8":   opSPST8,
 	"SPST.16":  opSPST16,
 	"SPST.32":  opSPST32,
@@ -104,6 +107,7 @@ var strToOneRegOperation = map[string]oneRegOperation{
 	"LD.8u":    opLD8u,
 	"LD.16u":   opLD16u,
 	"LD.32u":   opLD32u,
+	"LD.f32":   opLD32f,
 
 	// Specifications: p4
 	"ADDi.32":     opADDi32,
@@ -182,7 +186,7 @@ func fromStringToInstTypeOneReg(str string) (*instTypeOneReg, error) {
 
 	case opJR, opJALR,
 		opCSRRW, opCSRRS, opCSRRC, opCSRRWi, opCSRRSi, opCSRRCi,
-		opLD8, opLD16, opLD32, opLD64, opLD8u, opLD16u, opLD32u,
+		opLD8, opLD16, opLD32, opLD64, opLD8u, opLD16u, opLD32u, opLD32f,
 		opADDi32, opSLTi32, opSLTiu32, opXORi32, opORi32, opANDi32,
 		opADDi64, opSLTi64, opSLTiu64, opXORi64, opORi64, opANDi64,
 		opSLLi32, opSRLi32, opSLLi64, opSRLi64,
@@ -216,7 +220,7 @@ func fromStringToInstTypeOneReg(str string) (*instTypeOneReg, error) {
 		}
 
 	case opSPLD8, opSPLD16, opSPLD32, opSPLD64,
-		opSPLD8u, opSPLD16u, opSPLD32u:
+		opSPLD8u, opSPLD16u, opSPLD32u, opSPLD32f:
 		{
 			if len(ss) < 2 {
 				return nil, fmt.Errorf("too few arg: %s", str)
