@@ -43,7 +43,7 @@ const (
 	opMULHu64  twoRegOperation = 15311 // 00001_11_011_1_1001111
 	opDIV64    twoRegOperation = 15567 // 00001_11_100_1_1001111
 	opDIVu64   twoRegOperation = 15823 // 00001_11_101_1_1001111
-	opREM64    twoRegOperation = 15567 // 00001_11_100_1_1001111
+	opREM64    twoRegOperation = 16079 // 00001_11_110_1_1001111
 	opREMu64   twoRegOperation = 16335 // 00001_11_111_1_1001111
 )
 
